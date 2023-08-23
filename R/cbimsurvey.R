@@ -1,40 +1,192 @@
 
-#' Title
+#' Active OVCs filtering
 #'
-#' @param data
+#' @param data registration_list dataset
 #'
-#' @return
+#' @return A data frame of active OVCs
 #' @export
 #'
-#' @examples
-cbimsurvey_Section_a_list <- function(data) {
-  cbimsurvey_renamed <- data %>%
-    rename(
-      "Pims_Id" = `Pims Id`,
-      "quizA_Respect Towards Women" = `Respect Towards Women`,
-      "quizA_Stopping Kids Do Harmful Things" = `Stopping Kids Do Harmful Things`
-    )
+#' @examples active <- active_list(reglist)
+#'
+#' @author Jeremy Katush
+active_list <- function(data) {
+  active <- data %>% filter(exit_status == "ACTIVE")
+  return(active)
+}
 
-  melted_data <- cbimsurvey_renamed %>%
-    select(Pims_Id, Category, `quizA_Respect Towards Women`, `quizA_Stopping Kids Do Harmful Things`) %>%
-    pivot_longer(
-      cols = starts_with("quizA"),
-      names_to = "Question",
-      values_to = "Choice",
-      names_prefix = "quizA_"
-    )
 
-  look_up_table <- c("I wasn’t involved in this group for the past three months" = "1 a",
-                     "Yes, my coach talked to us about this" = "2 a",
-                     "No, my coach didn’t talk to us about this" = "3 a")
-  melted_data$Decoded_choice <- look_up_table[melted_data$Choice]
+#' Kilifi site Active OVCs
+#'
+#' @param data registration_list dataset
+#'
+#' @return A data frame of Kilifi site active OVCs
+#' @export
+#'
+#' @examples active_klf <- active_Kilifi_list(reglist)
+#'
+#' @author Jeremy Katush
+active_Kilifi_list <- function(data) {
+  active_kilifi <- data %>% filter(exit_status == "ACTIVE",
+                          ward == c("Kibarani","Mnarani","Tezo","Sokoni"))
+  return(active_kilifi)
+}
 
-  choices_combined <- melted_data %>%
-    group_by(Pims_Id, Question) %>%
-    summarize(Combined_Choices = paste(Decoded_choice, collapse = " | "))
 
-  return(choices_combined)
+#' Gede site Active OVCs
+#'
+#' @param data registration_list dataset
+#'
+#' @return A data frame of Gede site active OVCs
+#' @export
+#'
+#' @examples active_gede <- active_Gede_list(reglist)
+active_Gede_list <- function(data) {
+  active <- data %>% filter(exit_status == "ACTIVE",
+                            ward == c("Dabaso", "Matsangoni", "Watamu"))
+  return(active)
+}
 
+
+#' Malindi site Active OVCs
+#'
+#' @param data registration_list dataset
+#'
+#' @return A data frame of Malindi site active OVCs
+#' @export
+#'
+#' @examples active_mld <- active_Malindi_list(reglist)
+#'
+#' @author Jeremy Katush
+active_Malindi_list <- function(data) {
+  active <- data %>% filter(exit_status == "ACTIVE",
+                            ward == c("Ganda", "Jilore", "Kaksingiri West",
+                                      "Shella", "Kakuyuni", "Malindi Town"))
+  return(active)
+}
+
+#' Active and Unique OVCs
+#'
+#' @param data registration_list dataset
+#'
+#' @return A data frame of active and unique OVCs (in the order respectively)
+#' @export
+#'
+#' @examples active_unique <- active_Unique_OVC_list(reglist)
+#'
+#' @author Jeremy Katush
+active_Unique_OVC_list <- function(data) {
+  active_unique <- data %>% filter(exit_status == "ACTIVE") %>%
+    distinct(cpims_ovc_id, .keep_all = TRUE) %>%
+    as.data.frame()
+}
+
+
+#' Active and Unique OVCs
+#'
+#' @param data registration_list dataset
+#'
+#' @return A data frame of active and unique Caregivers (in the order respectively)
+#' @export
+#'
+#' @examples active_unique <- active_Unique_CG_list(reglist)
+#'
+#' @author Jeremy Katush
+active_Unique_CG_list <- function(data) {
+  active_unique <- data %>% filter(exit_status == "ACTIVE") %>%
+    distinct(caregiver_id, .keep_all = TRUE) %>%
+    as.data.frame()
+}
+
+
+#' Active CALHIV OVCs
+#'
+#' @param data registration_list dataset
+#'
+#' @return A data frame of Active CALHIV OVCs
+#' @export
+#'
+#' @examples calhiv <- calhiv_list(reglist)
+#'
+#' @author Jeremy Katush
+calhiv_list <- function(data) {
+  active_unique <- data %>% filter(exit_status == "ACTIVE") %>%
+    distinct(cpims_ovc_id, .keep_all = TRUE) %>%
+    as.data.frame()
+  calhiv <- active_unique %>% filter(ovchivstatus == "POSITIVE")
+  return(calhiv)
+}
+
+
+#' GEDE Positive OVCs list
+#'
+#' @param data registration_list dataset
+#'
+#' @return A data frame of POSITIVE OVCs
+#' @export
+#'
+#' @examples positive <- positive_Gede_list(reglist)
+#'
+#' @author Jeremy Katush
+positive_Gede_list <- function(data) {
+  positive <- data %>% filter(exit_status == "ACTIVE",
+                              ward == c("Dabaso", "Matsangoni", "Watamu"),
+                              ovchivstatus == "POSITIVE")
+  return(positive)
+}
+
+
+#' KILIFI Positive OVCs list
+#'
+#' @param data registration_list dataset
+#'
+#' @return A data frame of POSITIVE OVCs
+#' @export
+#'
+#' @examples positive <- positive_Kilifi_list(reglist)
+#'
+#' @author Jeremy Katush
+positive_Kilifi_list <- function(data) {
+  positive <- data %>% filter(exit_status == "ACTIVE",
+                              ward == c("Sokoni", "Kibarani", "Mnarani", "Tezo"),
+                              ovchivstatus == "POSITIVE")
+  return(positive)
+}
+
+
+
+#' Children of People Living with HIV (PLHIV)
+#'
+#' @param data registration_list dataset
+#'
+#' @return A data frame of Children of PLHIV
+#' @export
+#'
+#' @examples child_plhiv <- plhiv_Children_list(reglist)
+#'
+#' @author Jeremy Katush
+plhiv_Children_list <- function(data) {
+  children_of_plhiv <- data %>% filter(exit_status == "ACTIVE",
+                                       ward == c("Dabaso", "Matsangoni", "Watamu"),
+                                       caregiverhivstatus == "POSITIVE")
+  return(children_of_plhiv)
+}
+
+
+#' "HEI NOT KNOWN" OVCs
+#'
+#' @param data registration_list dataset
+#'
+#' @return A data frame of Active "HEI NOT KNOWN" OVCs
+#' @export
+#'
+#' @examples hei <- hei_list(reglist)
+#'
+#' @author Jeremy Katush
+hei_list <- function(data) {
+  hei <- data %>% filter(exit_status == "ACTIVE",
+                         ward == c("Dabaso", "Matsangoni", "Watamu"),
+                         ovchivstatus == "HEI NOT KNOWN")
+  return(hei)
 }
 
 
@@ -46,259 +198,48 @@ cbimsurvey_Section_a_list <- function(data) {
 #' @export
 #'
 #' @examples
-cbimsurvey_Section_b_list <- function(data) {
-  cbimsurvey_renamed <- data %>%
-    rename(
-      "quizB_Name Calling Or Insulting Them" = `Name Calling Or Insulting Them`,
-      "quizB_Ugly Or Stupid" = `Ugly Or Stupid`,
-      "quizB_Making Fun Ofthem" = `Making Fun Ofthem`,
-      "quizB_Telling Them What Todo" = `Telling Them What Todo`,
-      "quizB_Telling Friends To See Or Talkto" = `Telling Friends To See Or Talkto`,
-      "quizB_Pressuring Their Partners Not To Breakup" = `Pressuring Their Partners Not To Breakup`,
-      "quizB_Not Listening Them" = `Not Listening Them`,
-      "quizB_Convince Them To Have Sex" = `Convince Them To Have Sex`,
-      "quizB_Preventing Them Leaving A Room" = `Preventing Them Leaving A Room`,
-      "quizB_Distracting Spying Onthem" = `Distracting Spying Onthem`,
-      "quizB_Being Physically Intimate Without Consent" = `Being Physically Intimate Without Consent`,
-      "quizB_Threating To Hit Them" = `Threating To Hit Them`,
-      "quizB_Forcing Them To Have Sex" = `Forcing Them To Have Sex`,
-      "quizB_Pressuring Them Skip Their Activities" = `Pressuring Them Skip Their Activities`,
-      OB
-      "quizB_Constanly Contacting Them To Find Out There Whereabout" = `Constanly Contacting Them To Find Out There Whereabout`,
-      "quizB_Constantly Interrupting Them At Work" = `Constantly Interrupting Them At Work`,
-      "quizB_Using Their Creditcard Cash Without Permission" = `Using Their Creditcard Cash Without Permission`,
-      "quizC_Making Disrespective Comments About Girls Body" = `Making Disrespective Comments About Girls Body`,
-      "quizC_Spreading Rumors Abt Girls" = `Spreading Rumors Abt Girls`,
-      "quizC_Fighting Or Threatening Agirl" = `Fighting Or Threatening Agirl`,
-      "quizB_Constantly Asking Them To Pay For Activities Meal Othergifts" = `Constantly Asking Them To Pay For Activities Meal Othergifts`,
-      "quizC_Doing Unwelcome Actions" = `Doing Unwelcome Actions`,
-      "quizC_Pushing Grabbing Hittingor Hurting A Girl" = `Pushing Grabbing Hittingor Hurting A Girl`,
-      "quizC_Showing People Sexual Content Of A Girl Without Herconsent" = `Showing People Sexual Content Of A Girl Without Herconsent`,
-      "quizC_Telling Jokes That Disrespect Women" = `Telling Jokes That Disrespect Women`,
-      "quizC_Taking Advantage Of Drunk Girl" = `Taking Advantage Of Drunk Girl`,
-      "quizC_Pressure Girl Have Sex Intimate Without Consent" = `Pressure Girl Have Sex Intimate Without Consent`,
-      "quizD_Boy Not Have Tofight For Respect" = `Boy Not Have Tofight For Respect`,
-      "quizD_Girl Wearing Revealing Clothes Deserves Comment" = `Girl Wearing Revealing Clothes Deserves Comment`,
-      "quizD_Bothered When Guy Acts Girlish" = `Bothered When Guy Acts Girlish`,
-      "quizD_Guys With Lot Of Money Are Manlier" = `Guys With Lot Of Money Are Manlier`,
-      "quizD_Guy Who Ask For Help Looks Weak" = `Guy Who Ask For Help Looks Weak`,
-      "quizD_Guy Should Pay For Most Of Things Ina Good Dating" = `Guy Should Pay For Most Of Things Ina Good Dating`,
-      "quizD_Guys Should Only Hookup Or Havesex With Girls" = `Guys Should Only Hookup Or Havesex With Girls`,
-      "quizD_Respect Who Backs Down From Fight" = `Respect Who Backs Down From Fight`,
-      "quizD_Guy Should Share Household Chores" = `Guy Should Share Household Chores`,
-      "quizD_Girl Raped Or Raped Because Didnot Clearly Say No" = `Girl Raped Or Raped Because Didnot Clearly Say No`,
-    )
+reglist_Combined_lists <- function(data) {
+  active_list <- active_list(data)
+  active_Kilifi_list <- active_Kilifi_list(data)
+  active_Gede_list <- active_Gede_list(data)
+  active_Malindi_list <- active_Malindi_list(data)
+  active_Unique_OVC_list <- active_Unique_OVC_list(data)
+  active_Unique_CG_list <- active_Unique_CG_list(data)
+  calhiv_list <- calhiv_list(data)
+  positive_Gede_list <- positive_Gede_list(data)
+  positive_Kilifi_list <- positive_Kilifi_list(data)
+  plhiv_Children_list <- plhiv_Children_list(data)
+  hei_list <- hei_list(data)
 
-  melted_data <- cbimsurvey_renamed %>%
-    select(Pims_Id, Category, `quizB_Name Calling Or Insulting Them`:`quizB_Using Their Creditcard Cash Without Permission`) %>%
-    pivot_longer(
-      cols = starts_with("quizB"),
-      names_to = "Question",
-      values_to = "Choice",
-      names_prefix = "quizB_"
-    )
-
-  look_up_table <- c("1 not abusive" = "not abusive", "2" = "2 b", "3" = "3 b", "4" = "4 b", "5 abusive" = "abusive")
-  melted_data$Decoded_choice <- look_up_table[melted_data$Choice]
-
-  choices_combined <- melted_data %>%
-    group_by(Pims_Id, Question) %>%
-    summarize(Combined_Choices = paste(Decoded_choice, collapse = " | "))
-
-  return(choices_combined)
-
-}
-
-
-#' Title
-#'
-#' @param data
-#'
-#' @return
-#' @export
-#'
-#' @examples
-cbimsurvey_Section_c_list <- function(data) {
-  cbimsurvey_renamed <- data %>%
-    rename(
-      "Pims_Id" = `Pims Id`,
-      "quizA_Respect Towards Women" = `Respect Towards Women`,
-      "quizA_Stopping Kids Do Harmful Things" = `Stopping Kids Do Harmful Things`,
-      "quizB_Name Calling Or Insulting Them" = `Name Calling Or Insulting Them`,
-      "quizB_Ugly Or Stupid" = `Ugly Or Stupid`,
-      "quizB_Making Fun Ofthem" = `Making Fun Ofthem`,
-      "quizB_Telling Them What Todo" = `Telling Them What Todo`,
-      "quizB_Telling Friends To See Or Talkto" = `Telling Friends To See Or Talkto`,
-      "quizB_Pressuring Their Partners Not To Breakup" = `Pressuring Their Partners Not To Breakup`,
-      "quizB_Not Listening Them" = `Not Listening Them`,
-      "quizB_Convince Them To Have Sex" = `Convince Them To Have Sex`,
-      "quizB_Preventing Them Leaving A Room" = `Preventing Them Leaving A Room`,
-      "quizB_Distracting Spying Onthem" = `Distracting Spying Onthem`,
-      "quizB_Being Physically Intimate Without Consent" = `Being Physically Intimate Without Consent`,
-      "quizB_Threating To Hit Them" = `Threating To Hit Them`,
-      "quizB_Forcing Them To Have Sex" = `Forcing Them To Have Sex`,
-      "quizB_Pressuring Them Skip Their Activities" = `Pressuring Them Skip Their Activities`,
-      "quizB_Constanly Contacting Them To Find Out There Whereabout" = `Constanly Contacting Them To Find Out There Whereabout`,
-      "quizB_Constantly Interrupting Them At Work" = `Constantly Interrupting Them At Work`,
-      "quizB_Using Their Creditcard Cash Without Permission" = `Using Their Creditcard Cash Without Permission`,
-      "quizC_Making Disrespective Comments About Girls Body" = `Making Disrespective Comments About Girls Body`,
-      "quizC_Spreading Rumors Abt Girls" = `Spreading Rumors Abt Girls`,
-      "quizC_Fighting Or Threatening Agirl" = `Fighting Or Threatening Agirl`,
-      "quizB_Constantly Asking Them To Pay For Activities Meal Othergifts" = `Constantly Asking Them To Pay For Activities Meal Othergifts`,
-      "quizC_Doing Unwelcome Actions" = `Doing Unwelcome Actions`,
-      "quizC_Pushing Grabbing Hittingor Hurting A Girl" = `Pushing Grabbing Hittingor Hurting A Girl`,
-      "quizC_Showing People Sexual Content Of A Girl Without Herconsent" = `Showing People Sexual Content Of A Girl Without Herconsent`,
-      "quizC_Telling Jokes That Disrespect Women" = `Telling Jokes That Disrespect Women`,
-      "quizC_Taking Advantage Of Drunk Girl" = `Taking Advantage Of Drunk Girl`,
-      "quizC_Pressure Girl Have Sex Intimate Without Consent" = `Pressure Girl Have Sex Intimate Without Consent`,
-      "quizD_Boy Not Have Tofight For Respect" = `Boy Not Have Tofight For Respect`,
-      "quizD_Girl Wearing Revealing Clothes Deserves Comment" = `Girl Wearing Revealing Clothes Deserves Comment`,
-      "quizD_Bothered When Guy Acts Girlish" = `Bothered When Guy Acts Girlish`,
-      "quizD_Guys With Lot Of Money Are Manlier" = `Guys With Lot Of Money Are Manlier`,
-      "quizD_Guy Who Ask For Help Looks Weak" = `Guy Who Ask For Help Looks Weak`,
-      "quizD_Guy Should Pay For Most Of Things Ina Good Dating" = `Guy Should Pay For Most Of Things Ina Good Dating`,
-      "quizD_Guys Should Only Hookup Or Havesex With Girls" = `Guys Should Only Hookup Or Havesex With Girls`,
-      "quizD_Respect Who Backs Down From Fight" = `Respect Who Backs Down From Fight`,
-      "quizD_Guy Should Share Household Chores" = `Guy Should Share Household Chores`,
-      "quizD_Girl Raped Or Raped Because Didnot Clearly Say No" = `Girl Raped Or Raped Because Didnot Clearly Say No`,
-    )
-
-  melted_data <- cbimsurvey_renamed %>%
-    select(Pims_Id, Category, starts_with("quizC")) %>%
-    pivot_longer(
-      cols = starts_with("quizC"),
-      names_to = "Question",
-      values_to = "Choice",
-      names_prefix = "quizC_"
-    )
-
-  look_up_table <- c("Very unlikey" = "very_unlikely", "Unlikely" = "unlikey", "Not Sure" = "not_sure", "Likely" = "likely", "Very likely" = "very_likely")
-  melted_data$Decoded_choice <- look_up_table[melted_data$Choice]
-
-  choices_combined <- melted_data %>%
-    group_by(Pims_Id, Question) %>%
-    summarize(Combined_Choices = paste(Decoded_choice, collapse = " | "))
-
-  return(choices_combined)
-
-}
-
-
-#' Title
-#'
-#' @param data
-#'
-#' @return
-#' @export
-#'
-#' @examples
-cbimsurvey_Section_d_list <- function(data) {
-  cbimsurvey_renamed <- data %>%
-    rename(
-      "Pims_Id" = `Pims Id`,
-      "quizA_Respect Towards Women" = `Respect Towards Women`,
-      "quizA_Stopping Kids Do Harmful Things" = `Stopping Kids Do Harmful Things`,
-      "quizB_Name Calling Or Insulting Them" = `Name Calling Or Insulting Them`,
-      "quizB_Ugly Or Stupid" = `Ugly Or Stupid`,
-      "quizB_Making Fun Ofthem" = `Making Fun Ofthem`,
-      "quizB_Telling Them What Todo" = `Telling Them What Todo`,
-      "quizB_Telling Friends To See Or Talkto" = `Telling Friends To See Or Talkto`,
-      "quizB_Pressuring Their Partners Not To Breakup" = `Pressuring Their Partners Not To Breakup`,
-      "quizB_Not Listening Them" = `Not Listening Them`,
-      "quizB_Convince Them To Have Sex" = `Convince Them To Have Sex`,
-      "quizB_Preventing Them Leaving A Room" = `Preventing Them Leaving A Room`,
-      "quizB_Distracting Spying Onthem" = `Distracting Spying Onthem`,
-      "quizB_Being Physically Intimate Without Consent" = `Being Physically Intimate Without Consent`,
-      "quizB_Threating To Hit Them" = `Threating To Hit Them`,
-      "quizB_Forcing Them To Have Sex" = `Forcing Them To Have Sex`,
-      "quizB_Pressuring Them Skip Their Activities" = `Pressuring Them Skip Their Activities`,
-      "quizB_Constanly Contacting Them To Find Out There Whereabout" = `Constanly Contacting Them To Find Out There Whereabout`,
-      "quizB_Constantly Interrupting Them At Work" = `Constantly Interrupting Them At Work`,
-      "quizB_Using Their Creditcard Cash Without Permission" = `Using Their Creditcard Cash Without Permission`,
-      "quizC_Making Disrespective Comments About Girls Body" = `Making Disrespective Comments About Girls Body`,
-      "quizC_Spreading Rumors Abt Girls" = `Spreading Rumors Abt Girls`,
-      "quizC_Fighting Or Threatening Agirl" = `Fighting Or Threatening Agirl`,
-      "quizB_Constantly Asking Them To Pay For Activities Meal Othergifts" = `Constantly Asking Them To Pay For Activities Meal Othergifts`,
-      "quizC_Doing Unwelcome Actions" = `Doing Unwelcome Actions`,
-      "quizC_Pushing Grabbing Hittingor Hurting A Girl" = `Pushing Grabbing Hittingor Hurting A Girl`,
-      "quizC_Showing People Sexual Content Of A Girl Without Herconsent" = `Showing People Sexual Content Of A Girl Without Herconsent`,
-      "quizC_Telling Jokes That Disrespect Women" = `Telling Jokes That Disrespect Women`,
-      "quizC_Taking Advantage Of Drunk Girl" = `Taking Advantage Of Drunk Girl`,
-      "quizC_Pressure Girl Have Sex Intimate Without Consent" = `Pressure Girl Have Sex Intimate Without Consent`,
-      "quizD_Boy Not Have Tofight For Respect" = `Boy Not Have Tofight For Respect`,
-      "quizD_Girl Wearing Revealing Clothes Deserves Comment" = `Girl Wearing Revealing Clothes Deserves Comment`,
-      "quizD_Bothered When Guy Acts Girlish" = `Bothered When Guy Acts Girlish`,
-      "quizD_Guys With Lot Of Money Are Manlier" = `Guys With Lot Of Money Are Manlier`,
-      "quizD_Guy Who Ask For Help Looks Weak" = `Guy Who Ask For Help Looks Weak`,
-      "quizD_Guy Should Pay For Most Of Things Ina Good Dating" = `Guy Should Pay For Most Of Things Ina Good Dating`,
-      "quizD_Guys Should Only Hookup Or Havesex With Girls" = `Guys Should Only Hookup Or Havesex With Girls`,
-      "quizD_Respect Who Backs Down From Fight" = `Respect Who Backs Down From Fight`,
-      "quizD_Guy Should Share Household Chores" = `Guy Should Share Household Chores`,
-      "quizD_Girl Raped Or Raped Because Didnot Clearly Say No" = `Girl Raped Or Raped Because Didnot Clearly Say No`,
-    )
-
-  melted_data <- cbimsurvey_renamed %>%
-    select(Pims_Id, Category, starts_with("quizD")) %>%
-    pivot_longer(
-      cols = starts_with("quizD"),
-      names_to = "Question",
-      values_to = "Choice",
-      names_prefix = "quizD_"
-    )
-
-  look_up_table <- c("Strongly agree" = "strong_agree", "Agree" = "agree", "Not sure" = "not_sure4", "Disagree" = "disagree", "Strongly disagree" = "strong_disagree")
-  melted_data$Decoded_choice <- look_up_table[melted_data$Choice]
-
-  choices_combined <- melted_data %>%
-    group_by(Pims_Id, Question) %>%
-    summarize(Combined_Choices = paste(Decoded_choice, collapse = " | "))
-
-  return(choices_combined)
-
-}
-
-
-#' Title
-#'
-#' @param data
-#'
-#' @return
-#' @export
-#'
-#' @examples
-cbimsurvey_Combined_Sections_lists <- function(data) {
-  # Load your datasets into data frames (replace 'file_path' with actual file paths)
-  section_a <- cbimsurvey_Section_a_list(data)
-  section_b <- cbimsurvey_Section_b_list(data)
-  section_c <- cbimsurvey_Section_c_list(data)
-  section_d <- cbimsurvey_Section_d_list(data)
-
-  # Merge data frames using the common column
-  combined_df <- rbind(section_a, section_b, section_c, section_d)
-
-  # split Combined_Choices column
-  df_split <- separate(combined_df, col = 'Combined_Choices',
-                       into = c("post_programme", "pre_programme"),
-                       sep = "\\|", extra = "drop", fill = "right")
-
-  # Remove leading and trailing white spaces from the new columns
-  df_split$post_programme <- trimws(df_split$post_programme)
-  df_split$pre_programme <- trimws(df_split$pre_programme)
-
-  # Original dataset
-  cbimsurvey <- data
-
-  # Create workbook and save original data and results in different sheets
   wb <- createWorkbook()
 
-  addWorksheet(wb, sheetName = "cbimsurvey")
-  writeData(wb, sheet = "cbimsurvey", x = cbimsurvey)
-  addWorksheet(wb, sheetName = "pre-post")
-  writeData(wb, sheet = "pre-post", x = df_split)
+  addWorksheet(wb, sheetName = "active")
+  writeData(wb, sheet = "active", x = active_list)
+  addWorksheet(wb, sheetName = "active Kilifi")
+  writeData(wb, sheet = "active Kilifi", x = active_Kilifi_list)
+  addWorksheet(wb, sheetName = "active Gede")
+  writeData(wb, sheet = "active Gede", x = active_Gede_list)
+  addWorksheet(wb, sheetName = "active Malindi")
+  writeData(wb, sheet = "active Malindi", x = active_Malindi_list)
+  addWorksheet(wb, sheetName = "active Unique OVC")
+  writeData(wb, sheet = "active Unique OVC", x = active_Unique_OVC_list)
+  addWorksheet(wb, sheetName = "active Unique CG")
+  writeData(wb, sheet = "active Unique CG", x = active_Unique_CG_list)
+  addWorksheet(wb, sheetName = "calhiv")
+  writeData(wb, sheet = "calhiv", x = calhiv_list)
+  addWorksheet(wb, sheetName = "positive Gede")
+  writeData(wb, sheet = "positive Gede", x = positive_Gede_list)
+  addWorksheet(wb, sheetName = "positive Kilifi")
+  writeData(wb, sheet = "positive Kilifi", x = positive_Kilifi_list)
+  addWorksheet(wb, sheetName = "plhiv Children")
+  writeData(wb, sheet = "plhiv Children", x = plhiv_Children_list)
+  addWorksheet(wb, sheetName = "HEI")
+  writeData(wb, sheet = "HEI", x = hei_list)
 
-  saveWorkbook(wb, "updated_cbimsurvey_report.xlsx")
-  finale_updated_cbimsurvey <- openXL("updated_cbimsurvey_report.xlsx")
+  saveWorkbook(wb, "updated_reglist_report.xlsx")
+  finale_updated_reglist <- openXL("updated_reglist_report.xlsx")
 
-  return(finale_updated_cbimsurvey)
-
+  return(finale_updated_reglist)
 }
+
+
